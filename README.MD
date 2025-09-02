@@ -69,6 +69,7 @@ The API will be available at `http://localhost:8000`
 - **`min_price`** *(integer, optional)*: The minimum price in Euros for the listings (e.g., `200` for at least 200 Euros).
 - **`max_price`** *(integer, optional)*: The maximum price in Euros for the listings (e.g., `500` for at most 500 Euros).
 - **`page_count`** *(integer, optional)*: The number of pages to search or return (e.g., `5` for the first 5 pages, default is 1, max: 20 pages).
+- **`strict_search`** *(boolean, optional)*: Whether or not to include alternative search results when no exact matches are found (`false` by default disables strict search, showing alternative results. `true` will remove these from the results).
 
 ##### Example Request:
 ```http

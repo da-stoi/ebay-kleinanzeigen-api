@@ -12,11 +12,12 @@ async def get_inserate(query: str = Query(None),
                        radius: int = Query(None),
                        min_price: int = Query(None),
                        max_price: int = Query(None),
-                       page_count: int = Query(1, ge=1, le=20)):
+                       page_count: int = Query(1, ge=1, le=20),
+                       strict_search: bool = Query(None)):
     browser_manager = PlaywrightManager()
     await browser_manager.start()
     try:
-        results = await get_inserate_klaz(browser_manager, query, location, radius, min_price, max_price, page_count)
+        results = await get_inserate_klaz(browser_manager, query, location, radius, min_price, max_price, page_count, strict_search)
         return {"success": True, "data": results}
     finally:
         await browser_manager.close()
