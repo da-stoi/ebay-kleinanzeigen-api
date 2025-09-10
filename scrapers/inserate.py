@@ -40,7 +40,7 @@ async def get_inserate_klaz(browser_manager: PlaywrightManager,
 
     # Construct the full URL and get it
     search_url = base_url + search_path + ("?" + urlencode(params) if params else "")
-
+    
     page = await browser_manager.new_context_page()
     try:
         await page.goto(search_url.format(page=1), timeout=120000)
@@ -79,8 +79,10 @@ async def get_ads(page):
                 data_adid = await article.get_attribute("data-adid")
                 data_href = await article.get_attribute("data-href")
 
+                main_top_element = await article.query_selector("div.aditem-main--top")
+                
                 # Distance (if available)
-                distance_element = await article.query_selector("div.aditem-main--top > div.aditem-main--top--left")
+                distance_element = await main_top_element.query_selector("div.aditem-main--top--left")
                 distance_text = await distance_element.inner_text() if distance_element else ""
                 distance_text = distance_text.strip().replace("\n", " ")
                 # Apply regex to extract distance
@@ -96,6 +98,10 @@ async def get_ads(page):
                 else:
                     distance = 0
 
+                # Get post date
+                post_date_element = await main_top_element.query_selector("div.aditem-main--top--right")
+                post_date = await post_date_element.inner_text() if post_date_element else ""
+
                 # Preview image
                 preview_img_element = await article.query_selector(".aditem-image > a > div > img")
                 preview_img_url = await preview_img_element.get_attribute("src") if preview_img_element else ""
@@ -103,16 +109,19 @@ async def get_ads(page):
                 # Get title from h2 element
                 title_element = await article.query_selector("h2.text-module-begin a.ellipsis")
                 title_text = await title_element.inner_text() if title_element else ""
+
                 # Get price and description
                 price = await article.query_selector("p.aditem-main--middle--price-shipping--price")
+
                 # strip € and VB and strip whitespace
                 price_text = await price.inner_text() if price else ""
                 price_text = price_text.replace("€", "").replace("VB", "").replace(".", "").strip()
                 description = await article.query_selector("p.aditem-main--middle--description")
                 description_text = await description.inner_text() if description else ""
+
                 if data_adid and data_href:
                     data_href = f"https://www.kleinanzeigen.de{data_href}"
-                    results.append({"adid": data_adid, "url": data_href, "preview_image_url": preview_img_url, "title": title_text, "price": price_text, "description": description_text, "distance": distance})
+                    results.append({"adid": data_adid, "url": data_href, "preview_image_url": preview_img_url, "title": title_text, "price": price_text, "description": description_text, "distance": distance, "post_date": post_date})
         return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
